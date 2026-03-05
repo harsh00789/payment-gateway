@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Random;
 
 @Service
@@ -17,16 +18,26 @@ public class PaymentService {
     private final PaymentOrderRepository paymentOrderRepository;
     private final PaymentTransactionRepository paymentTransactionRepository;
     private  final WebhookService webhookService;
+    private final IdempotencyService idempotencyService;
 
     @Autowired
-    public PaymentService(PaymentOrderRepository paymentOrderRepository, PaymentTransactionRepository paymentTransactionRepository, WebhookService webhookService) {
+    public PaymentService(PaymentOrderRepository paymentOrderRepository, PaymentTransactionRepository paymentTransactionRepository, WebhookService webhookService, IdempotencyService idempotencyService) {
         this.paymentOrderRepository = paymentOrderRepository;
         this.paymentTransactionRepository = paymentTransactionRepository;
         this.webhookService = webhookService;
+        this.idempotencyService = idempotencyService;
     }
 
     @Transactional
-    public PaymentTransaction processPayment(Long orderId){
+    public PaymentTransaction processPayment(String idempotency,Long orderId){
+
+        String key = "payment:idempotency"+idempotency;
+
+        String existingPaymentId = idempotencyService.getExistingValue(key);
+        if(Objects.nonNull(existingPaymentId)){
+            return paymentTransactionRepository.findById(Long.parseLong(existingPaymentId)).orElseThrow();
+        }
+
       PaymentOrder paymentOrder = paymentOrderRepository.findById(orderId)
                 .orElseThrow(()->new RuntimeException("order not found"));
 
@@ -59,7 +70,9 @@ public class PaymentService {
          eventType,
          payload
  );
-        return paymentTransactionRepository.save(paymentTransactionBuilder.build());
+        PaymentTransaction paymentTransaction = paymentTransactionRepository.save(paymentTransactionBuilder.build());
 
+        idempotencyService.saveValue(key,paymentTransaction.getId().toString());
+        return paymentTransaction;
     }
 }

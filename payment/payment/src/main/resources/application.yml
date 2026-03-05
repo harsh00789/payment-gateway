@@ -8,6 +8,10 @@ spring:
     username: postgres
     password: 1234
     driver-class-name: org.postgresql.Driver
+  data:
+    redia:
+      port: 6379
+      host: localhost
 
   jpa:
     hibernate:

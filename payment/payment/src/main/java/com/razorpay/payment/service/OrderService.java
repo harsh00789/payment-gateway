@@ -8,23 +8,35 @@ import com.razorpay.payment.repository.PaymentOrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
 public class OrderService {
 
     private final PaymentOrderRepository paymentOrderRepository;
+    private final IdempotencyService idempotencyService;
 
     @Autowired
-    public OrderService(PaymentOrderRepository paymentOrderRepository) {
+    public OrderService(PaymentOrderRepository paymentOrderRepository, IdempotencyService idempotencyService) {
         this.paymentOrderRepository = paymentOrderRepository;
+        this.idempotencyService = idempotencyService;
     }
 
     public OrderResponse createOrder(String idempotencyKey, OrderRequest orderRequest) {
-        Optional<PaymentOrder> paymentOrderOptional = paymentOrderRepository.findByIdempotencyKey(idempotencyKey);
-        if (paymentOrderOptional.isPresent()) {
-            return mapTOOrder(paymentOrderOptional.get());
+
+        String key = "order:idempotency"+idempotencyKey;
+        String existingOrderId = idempotencyService.getExistingValue(key);
+        if(Objects.nonNull(existingOrderId)){
+          PaymentOrder paymentOrder =  paymentOrderRepository.findById(Long.parseLong(existingOrderId)).orElseThrow();
+        return mapTOOrder(paymentOrder);
         }
+
+
+//        Optional<PaymentOrder> paymentOrderOptional = paymentOrderRepository.findByIdempotencyKey(idempotencyKey);
+//        if (paymentOrderOptional.isPresent()) {
+//            return mapTOOrder(paymentOrderOptional.get());
+//        }
 
         PaymentOrder.PaymentOrderBuilder paymentOrderBuilder = PaymentOrder.builder()
                 .amount(orderRequest.getAmount())
@@ -34,6 +46,7 @@ public class OrderService {
 
 
        PaymentOrder paymentOrder =  paymentOrderRepository.save(paymentOrderBuilder.build());
+       idempotencyService.saveValue(key,paymentOrder.getId().toString());
        return mapTOOrder(paymentOrder);
     }
 
