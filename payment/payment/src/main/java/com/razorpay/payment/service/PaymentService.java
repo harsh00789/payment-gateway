@@ -1,6 +1,7 @@
 package com.razorpay.payment.service;
 
 import com.razorpay.payment.OrderStatus;
+import com.razorpay.payment.entity.FraudLog;
 import com.razorpay.payment.entity.PaymentOrder;
 import com.razorpay.payment.entity.PaymentTransaction;
 import com.razorpay.payment.repository.PaymentOrderRepository;
@@ -19,13 +20,15 @@ public class PaymentService {
     private final PaymentTransactionRepository paymentTransactionRepository;
     private  final WebhookService webhookService;
     private final IdempotencyService idempotencyService;
+    private final FraudDetectionService fraudDetectionService;
 
     @Autowired
-    public PaymentService(PaymentOrderRepository paymentOrderRepository, PaymentTransactionRepository paymentTransactionRepository, WebhookService webhookService, IdempotencyService idempotencyService) {
+    public PaymentService(PaymentOrderRepository paymentOrderRepository, PaymentTransactionRepository paymentTransactionRepository, WebhookService webhookService, IdempotencyService idempotencyService, FraudDetectionService fraudDetectionService) {
         this.paymentOrderRepository = paymentOrderRepository;
         this.paymentTransactionRepository = paymentTransactionRepository;
         this.webhookService = webhookService;
         this.idempotencyService = idempotencyService;
+        this.fraudDetectionService = fraudDetectionService;
     }
 
     @Transactional
@@ -45,6 +48,9 @@ public class PaymentService {
           throw new RuntimeException("payment already created");
       }
 
+if(fraudDetectionService.isFraud(orderId,paymentOrder.getAmount().longValue())){
+    throw new RuntimeException("Fraudulent transaction detected");
+}
       paymentOrder.setStatus(OrderStatus.PROCESSING);
 
       Boolean isProcessed = new Random().nextBoolean();
