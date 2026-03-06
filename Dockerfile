@@ -9,4 +9,4 @@ RUN ./gradlew bootJar -x test
 
 EXPOSE 8080
 
-CMD ["java","-jar","build/libs/*.jar"]
+CMD java -jar build/libs/*.jar
