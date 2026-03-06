@@ -1,12 +1,14 @@
 package com.razorpay.payment.service;
 
 import com.razorpay.payment.entity.FraudLog;
+import com.razorpay.payment.entity.PaymentTransaction;
 import com.razorpay.payment.repository.FraudLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -46,5 +48,10 @@ public class FraudDetectionService {
            return true;
        }
        return false;
+    }
+
+    public List<FraudLog> getAllFrauds(){
+        List<FraudLog>  fraudLogs =  fraudLogRepository.findAll();
+        return fraudLogs;
     }
 }
