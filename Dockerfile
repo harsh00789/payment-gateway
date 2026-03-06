@@ -1,11 +1,18 @@
+# Build stage
+FROM gradle:8.5-jdk17 AS build
+
+WORKDIR /app
+COPY payment/payment .
+
+RUN gradle build -x test
+
+# Run stage
 FROM eclipse-temurin:17-jdk
 
 WORKDIR /app
 
-COPY . .
+COPY --from=build /app/build/libs/*.jar app.jar
 
-RUN ./gradlew build || gradle build
+EXPOSE 8080
 
-EXPOSE 8081
-
-CMD ["java", "-jar", "build/libs/payment-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
