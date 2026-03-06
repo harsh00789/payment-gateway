@@ -1,0 +1,18 @@
+server:
+  port: ${PORT:8081}
+spring:
+  application:
+    name: payment
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASS}
+    driver-class-name: org.postgresql.Driver
+  data:
+    redia:
+      port: ${REDIS_PORT}
+      host: ${REDIS_HOST}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
