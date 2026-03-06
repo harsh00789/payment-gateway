@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: payment-gateway
+    runtime: java
+    plan: free
+    buildCommand: gradle build
+    startCommand: java -jar build/libs/payment-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: JAVA_VERSION
+        value: 17
