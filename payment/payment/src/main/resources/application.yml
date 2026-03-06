@@ -9,7 +9,7 @@ spring:
     password: ${DB_PASS}
     driver-class-name: org.postgresql.Driver
   data:
-    redia:
+    redis:
       port: ${REDIS_PORT}
       host: ${REDIS_HOST}
 
