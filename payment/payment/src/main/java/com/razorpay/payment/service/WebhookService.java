@@ -76,6 +76,10 @@ public class WebhookService {
       }
     }
 
+    public List<WebhookEvent> getAllWebhooks(){
+        return webhookEventRepository.findAll();
+    }
+
     public boolean handleWebhook(String signature,String payload){
       String newSignature =  HmacUtil.generateHmac(WEBHOOK_SECRET,payload);
       if(!newSignature.equals(payload)){

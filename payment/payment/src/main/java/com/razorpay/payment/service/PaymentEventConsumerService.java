@@ -1,6 +1,7 @@
 package com.razorpay.payment.service;
 
 import com.razorpay.payment.BO.PaymentEvent;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -26,7 +27,7 @@ public class PaymentEventConsumerService {
         this.webhookService = webhookService;
     }
 
-    @PostMapping
+    @PostConstruct
     public void startConsumer(){
         new Thread(()->{
             while (true){

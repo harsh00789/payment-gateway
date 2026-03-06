@@ -64,23 +64,6 @@ if(fraudDetectionService.isFraud(orderId,paymentOrder.getAmount().longValue())){
 
         paymentOrder.setStatus(isProcessed?OrderStatus.COMPLETED:OrderStatus.FAILED);
 
-//        String eventType = isProcessed?"success":"failed";
-//        String payload = """
-//                {
-//                "orderId":"%s",
-//                "status":"%s"
-//                }
-//                """.formatted(paymentOrder.getId(),status);
-//
-//
-// webhookService.createWebhook(
-//         "https://webhook.site/69aa335d-04b1-4bd9-b4d9-4913ca606776",
-//         eventType,
-//         payload
-// );
-
-
-
         PaymentTransaction paymentTransaction = paymentTransactionRepository.save(paymentTransactionBuilder.build());
 
         idempotencyService.saveValue(key,paymentTransaction.getId().toString());
