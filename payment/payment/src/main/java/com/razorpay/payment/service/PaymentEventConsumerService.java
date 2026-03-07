@@ -27,35 +27,35 @@ public class PaymentEventConsumerService {
         this.webhookService = webhookService;
     }
 
-//    @PostConstruct
-//    public void startConsumer(){
-//        new Thread(()->{
-//            while (true){
-//                try {
-//                    String json = stringRedisTemplate.opsForList().leftPop(QUEUE_NAME, Duration.ofSeconds(5));
-//                    if (Objects.isNull(json)) {
-//                        continue;
-//                    }
-//                    PaymentEvent event = objectMapper.readValue(json, PaymentEvent.class);
-//
-//                    String payload = """
-//                            {
-//                            "orderId":"%s",
-//                            "status":"%s"
-//                            }
-//                            """.formatted(event.getOrderId(), event.getStatus());
-//
-//
-//                    webhookService.createWebhook(
-//                            "https://webhook.site/69aa335d-04b1-4bd9-b4d9-4913ca606776",
-//                            event.getStatus(),
-//                            payload
-//                    );
-//                }catch (Exception e){
-//                    log.info("error processing event : "+e);
-//                }
-//
-//            }
-//        }).start();
-//    }
+    @PostConstruct
+    public void startConsumer(){
+        new Thread(()->{
+            while (true){
+                try {
+                    String json = stringRedisTemplate.opsForList().leftPop(QUEUE_NAME, Duration.ofSeconds(5));
+                    if (Objects.isNull(json)) {
+                        continue;
+                    }
+                    PaymentEvent event = objectMapper.readValue(json, PaymentEvent.class);
+
+                    String payload = """
+                            {
+                            "orderId":"%s",
+                            "status":"%s"
+                            }
+                            """.formatted(event.getOrderId(), event.getStatus());
+
+
+                    webhookService.createWebhook(
+                            "https://webhook.site/69aa335d-04b1-4bd9-b4d9-4913ca606776",
+                            event.getStatus(),
+                            payload
+                    );
+                }catch (Exception e){
+                    log.info("error processing event : "+e);
+                }
+
+            }
+        }).start();
+    }
 }
