@@ -8,6 +8,7 @@ import com.razorpay.payment.entity.PaymentTransaction;
 import com.razorpay.payment.repository.PaymentOrderRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,6 +30,9 @@ public class OrderService {
 
     public OrderResponse createOrder(String idempotencyKey, OrderRequest orderRequest) {
         log.info("Redis URL = " + System.getenv("REDIS_URL"));
+
+        System.getenv().forEach((k,v) -> System.out.println(k + "=" + v));
+
 
         String key = "order:idempotency"+idempotencyKey;
         String existingOrderId = idempotencyService.getExistingValue(key);
